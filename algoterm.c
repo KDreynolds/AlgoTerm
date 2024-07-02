@@ -25,7 +25,7 @@ void print_array(int arr[], int size, int highlight1, int highlight2) {
         if (i == highlight1 || i == highlight2)
             SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
         for (int j = 0; j < arr[i]; j++) {
-            printf("%c", 219);  // ASCII character for a block
+            printf("%c", 219);  
         }
         printf("%d ", arr[i]);
         if (i == highlight1 || i == highlight2)
@@ -39,7 +39,7 @@ void bubble_sort(int arr[], int size) {
         for (int j = 0; j < size - i - 1; j++) {
             clear_screen();
             print_array(arr, size, j, j + 1);
-            Sleep(100);  // Sleep for 100ms
+            Sleep(100);  
 
             if (arr[j] > arr[j + 1]) {
                 int temp = arr[j];
@@ -58,7 +58,7 @@ void selection_sort(int arr[], int size) {
         for (j = i + 1; j < size; j++) {
             clear_screen();
             print_array(arr, size, min_idx, j);
-            Sleep(100);  // Sleep for 100ms
+            Sleep(100);  
 
             if (arr[j] < arr[min_idx]) {
                 min_idx = j;
@@ -81,7 +81,7 @@ void insertion_sort(int arr[], int size) {
         while (j >= 0 && arr[j] > key) {
             clear_screen();
             print_array(arr, size, j, i);
-            Sleep(100);  // Sleep for 100ms
+            Sleep(100); 
 
             arr[j + 1] = arr[j];
             j = j - 1;
@@ -95,7 +95,7 @@ void merge(int arr[], int l, int m, int r) {
     int n1 = m - l + 1;
     int n2 = r - m;
 
-    // Dynamically allocate memory for L[] and R[]
+    
     int* L = (int*)malloc(n1 * sizeof(int));
     int* R = (int*)malloc(n2 * sizeof(int));
 
@@ -115,7 +115,7 @@ void merge(int arr[], int l, int m, int r) {
     while (i < n1 && j < n2) {
         clear_screen();
         print_array(arr, ARRAY_SIZE, l + i, m + 1 + j);
-        Sleep(100);  // Sleep for 100ms
+        Sleep(100);  
 
         if (L[i] <= R[j]) {
             arr[k] = L[i];
@@ -140,7 +140,6 @@ void merge(int arr[], int l, int m, int r) {
         k++;
     }
 
-    // Free dynamically allocated memory
     free(L);
     free(R);
 }
@@ -179,7 +178,7 @@ int partition(int arr[], int low, int high) {
     for (int j = low; j <= high - 1; j++) {
         clear_screen();
         print_array(arr, ARRAY_SIZE, i + 1, j);
-        Sleep(100);  // Sleep for 100ms
+        Sleep(100);  
 
         if (arr[j] < pivot) {
             i++;
@@ -218,7 +217,7 @@ void heapify(int arr[], int n, int i) {
         swap(&arr[i], &arr[largest]);
         clear_screen();
         print_array(arr, ARRAY_SIZE, i, largest);
-        Sleep(100);  // Sleep for 100ms
+        Sleep(100);  
         heapify(arr, n, largest);
     }
 }
@@ -231,7 +230,7 @@ void heap_sort(int arr[], int size) {
         swap(&arr[0], &arr[i]);
         clear_screen();
         print_array(arr, ARRAY_SIZE, 0, i);
-        Sleep(100);  // Sleep for 100ms
+        Sleep(100);  
         heapify(arr, i, 0);
     }
 }
@@ -361,7 +360,7 @@ void display_menu(int highlight_pos) {
 
 int get_user_choice() {
     int highlight_pos = 0;
-    char input[3] = { 0 }; // Buffer for input (up to 2 digits + null terminator)
+    char input[3] = { 0 }; 
     int input_pos = 0;
     int ch;
 
@@ -370,22 +369,22 @@ int get_user_choice() {
         display_menu(highlight_pos);
 
         ch = _getch();
-        if (ch == 224) {  // Arrow key pressed
+        if (ch == 224) {  
             ch = _getch();
             switch (ch) {
-            case 72:  // Up arrow
+            case 72:  
                 highlight_pos = (highlight_pos - 1 + NUM_OPTIONS) % NUM_OPTIONS;
                 input_pos = 0;
                 memset(input, 0, sizeof(input));
                 break;
-            case 80:  // Down arrow
+            case 80:  
                 highlight_pos = (highlight_pos + 1) % NUM_OPTIONS;
                 input_pos = 0;
                 memset(input, 0, sizeof(input));
                 break;
             }
         }
-        else if (ch == 13) {  // Enter key
+        else if (ch == 13) { 
             if (input_pos > 0) {
                 int choice = atoi(input);
                 if (choice > 0 && choice <= NUM_OPTIONS) {
@@ -396,7 +395,7 @@ int get_user_choice() {
                 return highlight_pos + 1;
             }
         }
-        else if (ch >= '0' && ch <= '9' && input_pos < 2) {  // Number key
+        else if (ch >= '0' && ch <= '9' && input_pos < 2) {  
             input[input_pos++] = ch;
             input[input_pos] = '\0';
             int choice = atoi(input);
@@ -404,7 +403,7 @@ int get_user_choice() {
                 highlight_pos = choice - 1;
             }
         }
-        else if (ch == 8 && input_pos > 0) {  // Backspace
+        else if (ch == 8 && input_pos > 0) {  
             input[--input_pos] = '\0';
             if (input_pos == 0) {
                 highlight_pos = 0;
@@ -496,7 +495,7 @@ int main() {
     do {
         choice = get_user_choice();
 
-        if (choice != 11) {  // Updated to reflect new exit option
+        if (choice != 11) {  
             clear_screen();
             initialize_array(arr, ARRAY_SIZE);
 
@@ -511,9 +510,9 @@ int main() {
 
             printf("\nExecution time: %.2f seconds\n", execution_time);
             printf("\nPress any key to continue...");
-            _getch();  // Wait for a key press
+            _getch();  
         }
-    } while (choice != 11);  // Updated to reflect new exit option
+    } while (choice != 11);  
 
     clear_screen();
     printf("\n\n");
