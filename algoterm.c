@@ -3,10 +3,11 @@
 #include <time.h>
 #include <windows.h>
 #include <conio.h>
+#include <string.h>
 
 #define ARRAY_SIZE 20
 #define MAX_VALUE 50
-#define NUM_OPTIONS 7
+#define NUM_OPTIONS 11
 
 void clear_screen() {
     system("cls");
@@ -235,6 +236,102 @@ void heap_sort(int arr[], int size) {
     }
 }
 
+void shell_sort(int arr[], int size) {
+    for (int gap = size / 2; gap > 0; gap /= 2) {
+        for (int i = gap; i < size; i++) {
+            int temp = arr[i];
+            int j;
+            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
+                arr[j] = arr[j - gap];
+                clear_screen();
+                print_array(arr, size, j, j - gap);
+                Sleep(100);
+            }
+            arr[j] = temp;
+        }
+    }
+}
+
+void comb_sort(int arr[], int size) {
+    int gap = size;
+    float shrink = 1.3;
+    int sorted = 0;
+
+    while (!sorted) {
+        gap = (int)((float)gap / shrink);
+        if (gap <= 1) {
+            gap = 1;
+            sorted = 1;
+        }
+
+        for (int i = 0; i + gap < size; i++) {
+            if (arr[i] > arr[i + gap]) {
+                swap(&arr[i], &arr[i + gap]);
+                sorted = 0;
+                clear_screen();
+                print_array(arr, size, i, i + gap);
+                Sleep(100);
+            }
+        }
+    }
+}
+
+void gnome_sort(int arr[], int size) {
+    int index = 0;
+
+    while (index < size) {
+        if (index == 0)
+            index++;
+        if (arr[index] >= arr[index - 1])
+            index++;
+        else {
+            swap(&arr[index], &arr[index - 1]);
+            index--;
+            clear_screen();
+            print_array(arr, size, index, index + 1);
+            Sleep(100);
+        }
+    }
+}
+
+void cocktail_shaker_sort(int arr[], int size) {
+    int swapped = 1;
+    int start = 0;
+    int end = size - 1;
+
+    while (swapped) {
+        swapped = 0;
+
+        for (int i = start; i < end; i++) {
+            if (arr[i] > arr[i + 1]) {
+                swap(&arr[i], &arr[i + 1]);
+                swapped = 1;
+                clear_screen();
+                print_array(arr, size, i, i + 1);
+                Sleep(100);
+            }
+        }
+
+        if (!swapped)
+            break;
+
+        swapped = 0;
+        end--;
+
+        for (int i = end - 1; i >= start; i--) {
+            if (arr[i] > arr[i + 1]) {
+                swap(&arr[i], &arr[i + 1]);
+                swapped = 1;
+                clear_screen();
+                print_array(arr, size, i, i + 1);
+                Sleep(100);
+            }
+        }
+
+        start++;
+    }
+}
+
 void display_menu(int highlight_pos) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     WORD saved_attributes;
@@ -246,7 +343,10 @@ void display_menu(int highlight_pos) {
     printf("AlgoTerm - Terminal Algorithm Visualizer\n");
     printf("--------------------\n");
 
-    const char* options[] = { "1. Bubble Sort", "2. Selection Sort", "3. Insertion Sort", "4. Merge Sort", "5. Quick Sort", "6. Heap Sort", "7. Exit" };
+    const char* options[] = { "1. Bubble Sort", "2. Selection Sort", "3. Insertion Sort",
+                              "4. Merge Sort", "5. Quick Sort", "6. Heap Sort",
+                              "7. Shell Sort", "8. Comb Sort", "9. Gnome Sort",
+                              "10. Cocktail Shaker Sort", "11. Exit" };
 
     for (int i = 0; i < NUM_OPTIONS; i++) {
         if (i == highlight_pos) {
@@ -261,6 +361,8 @@ void display_menu(int highlight_pos) {
 
 int get_user_choice() {
     int highlight_pos = 0;
+    char input[3] = { 0 }; // Buffer for input (up to 2 digits + null terminator)
+    int input_pos = 0;
     int ch;
 
     while (1) {
@@ -273,17 +375,46 @@ int get_user_choice() {
             switch (ch) {
             case 72:  // Up arrow
                 highlight_pos = (highlight_pos - 1 + NUM_OPTIONS) % NUM_OPTIONS;
+                input_pos = 0;
+                memset(input, 0, sizeof(input));
                 break;
             case 80:  // Down arrow
                 highlight_pos = (highlight_pos + 1) % NUM_OPTIONS;
+                input_pos = 0;
+                memset(input, 0, sizeof(input));
                 break;
             }
         }
         else if (ch == 13) {  // Enter key
-            return highlight_pos + 1;
+            if (input_pos > 0) {
+                int choice = atoi(input);
+                if (choice > 0 && choice <= NUM_OPTIONS) {
+                    return choice;
+                }
+            }
+            else {
+                return highlight_pos + 1;
+            }
         }
-        else if (ch >= '1' && ch <= '0' + NUM_OPTIONS) {  // Number key
-            return ch - '0';
+        else if (ch >= '0' && ch <= '9' && input_pos < 2) {  // Number key
+            input[input_pos++] = ch;
+            input[input_pos] = '\0';
+            int choice = atoi(input);
+            if (choice > 0 && choice <= NUM_OPTIONS) {
+                highlight_pos = choice - 1;
+            }
+        }
+        else if (ch == 8 && input_pos > 0) {  // Backspace
+            input[--input_pos] = '\0';
+            if (input_pos == 0) {
+                highlight_pos = 0;
+            }
+            else {
+                int choice = atoi(input);
+                if (choice > 0 && choice <= NUM_OPTIONS) {
+                    highlight_pos = choice - 1;
+                }
+            }
         }
     }
 }
@@ -325,6 +456,26 @@ double run_algorithm(int choice, int arr[], int size) {
         Sleep(1000);
         heap_sort(arr, size);
         break;
+    case 7:
+        printf("Running Shell Sort...\n");
+        Sleep(1000);
+        shell_sort(arr, size);
+        break;
+    case 8:
+        printf("Running Comb Sort...\n");
+        Sleep(1000);
+        comb_sort(arr, size);
+        break;
+    case 9:
+        printf("Running Gnome Sort...\n");
+        Sleep(1000);
+        gnome_sort(arr, size);
+        break;
+    case 10:
+        printf("Running Cocktail Shaker Sort...\n");
+        Sleep(1000);
+        cocktail_shaker_sort(arr, size);
+        break;
     default:
         printf("Invalid choice or not implemented yet.\n");
         Sleep(1000);
@@ -345,7 +496,7 @@ int main() {
     do {
         choice = get_user_choice();
 
-        if (choice != 7) {  // Updated to reflect new exit option
+        if (choice != 11) {  // Updated to reflect new exit option
             clear_screen();
             initialize_array(arr, ARRAY_SIZE);
 
@@ -362,7 +513,7 @@ int main() {
             printf("\nPress any key to continue...");
             _getch();  // Wait for a key press
         }
-    } while (choice != 7);  // Updated to reflect new exit option
+    } while (choice != 11);  // Updated to reflect new exit option
 
     clear_screen();
     printf("\n\n");
