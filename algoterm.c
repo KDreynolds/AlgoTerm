@@ -6,7 +6,7 @@
 
 #define ARRAY_SIZE 20
 #define MAX_VALUE 50
-#define NUM_OPTIONS 6
+#define NUM_OPTIONS 7
 
 void clear_screen() {
     system("cls");
@@ -202,6 +202,39 @@ void quick_sort(int arr[], int size) {
     quick_sort_recursive(arr, 0, size - 1);
 }
 
+void heapify(int arr[], int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n && arr[left] > arr[largest])
+        largest = left;
+
+    if (right < n && arr[right] > arr[largest])
+        largest = right;
+
+    if (largest != i) {
+        swap(&arr[i], &arr[largest]);
+        clear_screen();
+        print_array(arr, ARRAY_SIZE, i, largest);
+        Sleep(100);  // Sleep for 100ms
+        heapify(arr, n, largest);
+    }
+}
+
+void heap_sort(int arr[], int size) {
+    for (int i = size / 2 - 1; i >= 0; i--)
+        heapify(arr, size, i);
+
+    for (int i = size - 1; i > 0; i--) {
+        swap(&arr[0], &arr[i]);
+        clear_screen();
+        print_array(arr, ARRAY_SIZE, 0, i);
+        Sleep(100);  // Sleep for 100ms
+        heapify(arr, i, 0);
+    }
+}
+
 void display_menu(int highlight_pos) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     WORD saved_attributes;
@@ -213,7 +246,7 @@ void display_menu(int highlight_pos) {
     printf("AlgoTerm - Terminal Algorithm Visualizer\n");
     printf("--------------------\n");
 
-    const char* options[] = { "1. Bubble Sort", "2. Selection Sort", "3. Insertion Sort", "4. Merge Sort", "5. Quick Sort", "6. Exit" };
+    const char* options[] = { "1. Bubble Sort", "2. Selection Sort", "3. Insertion Sort", "4. Merge Sort", "5. Quick Sort", "6. Heap Sort", "7. Exit" };
 
     for (int i = 0; i < NUM_OPTIONS; i++) {
         if (i == highlight_pos) {
@@ -287,6 +320,11 @@ double run_algorithm(int choice, int arr[], int size) {
         Sleep(1000);
         quick_sort(arr, size);
         break;
+    case 6:
+        printf("Running Heap Sort...\n");
+        Sleep(1000);
+        heap_sort(arr, size);
+        break;
     default:
         printf("Invalid choice or not implemented yet.\n");
         Sleep(1000);
@@ -307,7 +345,7 @@ int main() {
     do {
         choice = get_user_choice();
 
-        if (choice != 6) {  // Updated to reflect new exit option
+        if (choice != 7) {  // Updated to reflect new exit option
             clear_screen();
             initialize_array(arr, ARRAY_SIZE);
 
@@ -324,7 +362,7 @@ int main() {
             printf("\nPress any key to continue...");
             _getch();  // Wait for a key press
         }
-    } while (choice != 6);  // Updated to reflect new exit option
+    } while (choice != 7);  // Updated to reflect new exit option
 
     clear_screen();
     printf("\n\n");
