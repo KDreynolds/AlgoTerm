@@ -1,35 +1,45 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <windows.h>
-#include <conio.h>
 #include <string.h>
+#include <unistd.h>
+#include <termios.h>
 
 #define ARRAY_SIZE 20
 #define MAX_VALUE 50
 #define NUM_OPTIONS 11
 
+
 void clear_screen() {
-    system("cls");
+    printf("\033[2J\033[H");
+}
+
+void sleep_ms(int milliseconds) {
+    usleep(milliseconds * 1000);
+}
+
+int getch() {
+    struct termios old_tio, new_tio;
+    int ch;
+    tcgetattr(STDIN_FILENO, &old_tio);
+    new_tio = old_tio;
+    new_tio.c_lflag &= (~ICANON & ~ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+    return ch;
 }
 
 void print_array(int arr[], int size, int highlight1, int highlight2) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-    WORD saved_attributes;
-
-    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
-    saved_attributes = consoleInfo.wAttributes;
-
     for (int i = 0; i < size; i++) {
         if (i == highlight1 || i == highlight2)
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
+            printf("\033[0;31m"); // Set text color to red
         for (int j = 0; j < arr[i]; j++) {
             printf("%c", 219);  
         }
         printf("%d ", arr[i]);
         if (i == highlight1 || i == highlight2)
-            SetConsoleTextAttribute(hConsole, saved_attributes);
+            printf("\033[0m"); // Reset text color
         printf("\n");
     }
 }
@@ -39,7 +49,7 @@ void bubble_sort(int arr[], int size) {
         for (int j = 0; j < size - i - 1; j++) {
             clear_screen();
             print_array(arr, size, j, j + 1);
-            Sleep(100);  
+            sleep(100);  
 
             if (arr[j] > arr[j + 1]) {
                 int temp = arr[j];
@@ -58,7 +68,7 @@ void selection_sort(int arr[], int size) {
         for (j = i + 1; j < size; j++) {
             clear_screen();
             print_array(arr, size, min_idx, j);
-            Sleep(100);  
+            sleep(100);  
 
             if (arr[j] < arr[min_idx]) {
                 min_idx = j;
@@ -81,7 +91,7 @@ void insertion_sort(int arr[], int size) {
         while (j >= 0 && arr[j] > key) {
             clear_screen();
             print_array(arr, size, j, i);
-            Sleep(100); 
+            sleep(100); 
 
             arr[j + 1] = arr[j];
             j = j - 1;
@@ -115,7 +125,7 @@ void merge(int arr[], int l, int m, int r) {
     while (i < n1 && j < n2) {
         clear_screen();
         print_array(arr, ARRAY_SIZE, l + i, m + 1 + j);
-        Sleep(100);  
+        sleep(100);  
 
         if (L[i] <= R[j]) {
             arr[k] = L[i];
@@ -178,7 +188,7 @@ int partition(int arr[], int low, int high) {
     for (int j = low; j <= high - 1; j++) {
         clear_screen();
         print_array(arr, ARRAY_SIZE, i + 1, j);
-        Sleep(100);  
+        sleep(100);  
 
         if (arr[j] < pivot) {
             i++;
@@ -217,7 +227,7 @@ void heapify(int arr[], int n, int i) {
         swap(&arr[i], &arr[largest]);
         clear_screen();
         print_array(arr, ARRAY_SIZE, i, largest);
-        Sleep(100);  
+        sleep(100);  
         heapify(arr, n, largest);
     }
 }
@@ -230,7 +240,7 @@ void heap_sort(int arr[], int size) {
         swap(&arr[0], &arr[i]);
         clear_screen();
         print_array(arr, ARRAY_SIZE, 0, i);
-        Sleep(100);  
+        sleep(100);  
         heapify(arr, i, 0);
     }
 }
@@ -244,7 +254,7 @@ void shell_sort(int arr[], int size) {
                 arr[j] = arr[j - gap];
                 clear_screen();
                 print_array(arr, size, j, j - gap);
-                Sleep(100);
+                sleep(100);
             }
             arr[j] = temp;
         }
@@ -269,7 +279,7 @@ void comb_sort(int arr[], int size) {
                 sorted = 0;
                 clear_screen();
                 print_array(arr, size, i, i + gap);
-                Sleep(100);
+                sleep(100);
             }
         }
     }
@@ -288,7 +298,7 @@ void gnome_sort(int arr[], int size) {
             index--;
             clear_screen();
             print_array(arr, size, index, index + 1);
-            Sleep(100);
+            sleep(100);
         }
     }
 }
@@ -307,7 +317,7 @@ void cocktail_shaker_sort(int arr[], int size) {
                 swapped = 1;
                 clear_screen();
                 print_array(arr, size, i, i + 1);
-                Sleep(100);
+                sleep(100);
             }
         }
 
@@ -323,7 +333,7 @@ void cocktail_shaker_sort(int arr[], int size) {
                 swapped = 1;
                 clear_screen();
                 print_array(arr, size, i, i + 1);
-                Sleep(100);
+                sleep(100);
             }
         }
 
@@ -332,13 +342,6 @@ void cocktail_shaker_sort(int arr[], int size) {
 }
 
 void display_menu(int highlight_pos) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    WORD saved_attributes;
-    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-
-    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
-    saved_attributes = consoleInfo.wAttributes;
-
     printf("AlgoTerm - Terminal Algorithm Visualizer\n");
     printf("--------------------\n");
 
@@ -349,10 +352,12 @@ void display_menu(int highlight_pos) {
 
     for (int i = 0; i < NUM_OPTIONS; i++) {
         if (i == highlight_pos) {
-            SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+            printf("\033[7m"); // Invert colors for highlighting
         }
         printf("%s\n", options[i]);
-        SetConsoleTextAttribute(hConsole, saved_attributes);
+        if (i == highlight_pos) {
+            printf("\033[0m"); // Reset colors
+        }
     }
 
     printf("\nUse arrow keys to navigate and Enter to select, or type the number");
@@ -368,23 +373,26 @@ int get_user_choice() {
         clear_screen();
         display_menu(highlight_pos);
 
-        ch = _getch();
-        if (ch == 224) {  
-            ch = _getch();
-            switch (ch) {
-            case 72:  
-                highlight_pos = (highlight_pos - 1 + NUM_OPTIONS) % NUM_OPTIONS;
-                input_pos = 0;
-                memset(input, 0, sizeof(input));
-                break;
-            case 80:  
-                highlight_pos = (highlight_pos + 1) % NUM_OPTIONS;
-                input_pos = 0;
-                memset(input, 0, sizeof(input));
-                break;
+        ch = getch();
+        if (ch == 27) {  // ESC character
+            ch = getch();
+            if (ch == 91) {  // [ character
+                ch = getch();
+                switch (ch) {
+                case 65:  // Up arrow
+                    highlight_pos = (highlight_pos - 1 + NUM_OPTIONS) % NUM_OPTIONS;
+                    input_pos = 0;
+                    memset(input, 0, sizeof(input));
+                    break;
+                case 66:  // Down arrow
+                    highlight_pos = (highlight_pos + 1) % NUM_OPTIONS;
+                    input_pos = 0;
+                    memset(input, 0, sizeof(input));
+                    break;
+                }
             }
         }
-        else if (ch == 13) { 
+        else if (ch == 10) {  // Enter key
             if (input_pos > 0) {
                 int choice = atoi(input);
                 if (choice > 0 && choice <= NUM_OPTIONS) {
@@ -395,7 +403,7 @@ int get_user_choice() {
                 return highlight_pos + 1;
             }
         }
-        else if (ch >= '0' && ch <= '9' && input_pos < 2) {  
+        else if (ch >= '0' && ch <= '9' && input_pos < 2) {
             input[input_pos++] = ch;
             input[input_pos] = '\0';
             int choice = atoi(input);
@@ -403,7 +411,7 @@ int get_user_choice() {
                 highlight_pos = choice - 1;
             }
         }
-        else if (ch == 8 && input_pos > 0) {  
+        else if (ch == 127 && input_pos > 0) {  // Backspace
             input[--input_pos] = '\0';
             if (input_pos == 0) {
                 highlight_pos = 0;
@@ -418,6 +426,7 @@ int get_user_choice() {
     }
 }
 
+
 double run_algorithm(int choice, int arr[], int size) {
     clock_t start, end;
     double cpu_time_used;
@@ -427,57 +436,57 @@ double run_algorithm(int choice, int arr[], int size) {
     switch (choice) {
     case 1:
         printf("Running Bubble Sort...\n");
-        Sleep(1000);
+        sleep_ms(1000);
         bubble_sort(arr, size);
         break;
     case 2:
         printf("Running Selection Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         selection_sort(arr, size);
         break;
     case 3:
         printf("Running Insertion Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         insertion_sort(arr, size);
         break;
     case 4:
         printf("Running Merge Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         merge_sort(arr, size);
         break;
     case 5:
         printf("Running Quick Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         quick_sort(arr, size);
         break;
     case 6:
         printf("Running Heap Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         heap_sort(arr, size);
         break;
     case 7:
         printf("Running Shell Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         shell_sort(arr, size);
         break;
     case 8:
         printf("Running Comb Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         comb_sort(arr, size);
         break;
     case 9:
         printf("Running Gnome Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         gnome_sort(arr, size);
         break;
     case 10:
         printf("Running Cocktail Shaker Sort...\n");
-        Sleep(1000);
+        sleep(1000);
         cocktail_shaker_sort(arr, size);
         break;
     default:
         printf("Invalid choice or not implemented yet.\n");
-        Sleep(1000);
+        sleep_ms(1000);
         return 0;
     }
 
@@ -501,7 +510,7 @@ int main() {
 
             printf("Original array:\n");
             print_array(arr, ARRAY_SIZE, -1, -1);
-            Sleep(2000);
+            sleep_ms(2000);
 
             execution_time = run_algorithm(choice, arr, ARRAY_SIZE);
 
@@ -510,14 +519,14 @@ int main() {
 
             printf("\nExecution time: %.2f seconds\n", execution_time);
             printf("\nPress any key to continue...");
-            _getch();  
+            getch();
         }
-    } while (choice != 11);  
+    } while (choice != 11);
 
     clear_screen();
     printf("\n\n");
     printf("Thank you for using AlgoTerm!\n");
     printf("\nPress any key to exit...");
-    _getch();
+    getch();
     return 0;
 }
